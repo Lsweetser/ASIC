@@ -1,2 +1,2 @@
 # ASIC
-Created with ChatGPT
+Created with ChatGPT.
