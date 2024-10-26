@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Smooth scrolling with extended easing effect
+    // Smooth scrolling with a custom easing effect
     const links = document.querySelectorAll(".navbar a");
 
     links.forEach(link => {
@@ -7,28 +7,35 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
             const targetId = this.getAttribute("href").substring(1);
             const targetElement = document.getElementById(targetId);
+            const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY;
+            const startPosition = window.scrollY;
+            const distance = targetPosition - startPosition;
+            const duration = Math.min(1000, Math.abs(distance) / 2); // Max duration of 1 second
+            let startTime = null;
 
-            let start = null;
-            const duration = 1000; // 1-second scroll duration
+            // Easing function for smooth scrolling
+            const easeInOutQuad = (t) => {
+                return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            };
 
-            function step(timestamp) {
-                if (!start) start = timestamp;
-                const progress = timestamp - start;
+            function animation(currentTime) {
+                if (!startTime) startTime = currentTime; // Set start time
+                const timeElapsed = currentTime - startTime; // Calculate elapsed time
+                const progress = Math.min(timeElapsed / duration, 1); // Ensure progress doesn't exceed 1
 
-                const targetPosition = targetElement.offsetTop;
-                const scrollPosition = window.pageYOffset;
-                const distance = targetPosition - scrollPosition - 70; // 70px offset for fixed navbar
+                const ease = easeInOutQuad(progress); // Apply easing
+                const scrollY = startPosition + distance * ease; // Calculate new scroll position
 
-                const ease = (t) => t * (2 - t); // Easing function
+                window.scrollTo(0, scrollY); // Scroll to new position
 
-                window.scrollTo(0, scrollPosition + distance * ease(progress / duration));
-
-                if (progress < duration) {
-                    window.requestAnimationFrame(step);
+                if (progress < 1) {
+                    requestAnimationFrame(animation); // Continue animation until completion
                 }
             }
 
-            window.requestAnimationFrame(step);
+            // Immediately scroll to the target position to avoid any pause
+            window.scrollTo(0, targetPosition);
+            requestAnimationFrame(animation); // Start the animation
         });
     });
 });
